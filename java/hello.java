@@ -9,6 +9,8 @@ public class Hello {
 
         Greeter g = new FriendlyGreeter();
         System.out.println(g.greet("Dhruva"));
+        Greeter gf = new FormalGreeter();
+        System.out.println(gf.greet("Dhruva"));
 
        
     }
