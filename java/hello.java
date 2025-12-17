@@ -6,6 +6,10 @@ public class Hello {
         System.out.println(p.getAge());
         p.haveBirthday();
         System.out.println(p.getAge());
+
+        Greeter g = new FriendlyGreeter();
+        System.out.println(g.greet("Dhruva"));
+
        
     }
 }
