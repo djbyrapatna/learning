@@ -1,3 +1,5 @@
+package flags;
+
 public class ExperimentConfig{
     private String experimentKey;
     private int treatmentPercent;
