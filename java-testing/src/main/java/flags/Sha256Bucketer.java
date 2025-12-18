@@ -9,7 +9,7 @@ public class Sha256Bucketer implements Bucketer{
 
     @Override
     public int bucket(String experimentKey, String userId, String salt, int modulo){
-        String toHash = experimentKey + userId + salt;
+        String toHash = experimentKey + salt + userId;
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(toHash.getBytes(StandardCharsets.UTF_8));
