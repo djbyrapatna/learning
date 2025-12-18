@@ -2,5 +2,6 @@ package flags;
 
 public enum Variant{
     CONTROL,
-    TREATMENT;
+    TREATMENT,
+    TREATMENT_2;
 }

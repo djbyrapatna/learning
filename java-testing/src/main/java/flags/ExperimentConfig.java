@@ -1,29 +1,47 @@
 package flags;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExperimentConfig{
     private String experimentKey;
-    private int treatmentPercent;
+    private Map<Variant, Integer> weights;
+    private String salt;
+    //private int treatmentPercent;
 
-    private boolean validateExperimentKey(String key){
-        if (key == null){
+    private boolean validateString(String testString){
+        if (testString == null){
             return false;
         }
-        return !key.isBlank();
+        return !testString.isBlank();
     }
 
     private boolean validateTreatmentPercent(int percent){
         return (percent >=0 && percent <=100);
     }
 
-    public ExperimentConfig(String experimentKey, int treatmentPercent){
-        if (!validateExperimentKey(experimentKey)){
-            throw new IllegalArgumentException("Null, blank, or invalid experiment key");
+    private boolean validateWeights(Map<Variant, Integer> weights){
+        for (Integer weight : weights.values()){
+            if (weight < 0){
+                return false;
+            }
         }
-        if (!validateTreatmentPercent(treatmentPercent)){
-            throw new IllegalArgumentException("Treament percent out of range 0-100");
+        return true;
+        
+    }
+
+    public ExperimentConfig(String experimentKey, Map<Variant, Integer> weights, String salt){
+        if (!validateString(experimentKey)){
+            throw new InvalidInputException("Null, blank, or invalid experiment key");
+        }
+        if (!validateWeights(weights)){
+            throw new InvalidInputException("One or more weights are below zero");
+        }
+        if (!validateString(salt)){
+            throw new InvalidInputException("Null, blank, or invalid salt string");
         }
         this.experimentKey = experimentKey;
-        this.treatmentPercent = treatmentPercent;
+        this.weights = weights;
+        this.salt = salt;
 
     }
 
@@ -31,8 +49,21 @@ public class ExperimentConfig{
         return experimentKey;
     }
 
-    public int getTreatmentPercent(){
-        return treatmentPercent;
+    public String getSaltString(){
+        return salt;
     }
+
+    public Map<Variant, Integer> getWeights(){
+        return weights;
+    }
+
+    public int getTotalWeight(){
+        int total = 0;
+        for (int weight: weights.values()){
+            total+=weight;
+        }
+        return total;
+    }
+    
 
 }
