@@ -67,7 +67,7 @@ public class DeterministicAssignmentService implements AssignmentService{
             throw new InvalidInputException("User id cannot be null or blank");
         }
         Optional<ExperimentConfig> configOpt = store.get(experimentKey);
-        if (configOpt.isEmpty()){
+        if (configOpt==null || !configOpt.isPresent()){
             throw new UnknownExperimentException("Experiment key "+experimentKey+" does not correspond to a valid experiment");
         }
         ExperimentConfig config = configOpt.get();
