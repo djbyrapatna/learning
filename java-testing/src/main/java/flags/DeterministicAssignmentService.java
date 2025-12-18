@@ -1,11 +1,16 @@
 package flags;
 
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
+
+
 
 public class DeterministicAssignmentService implements AssignmentService{
 
     private final ExperimentStore store;
+    private final Bucketer bucketer;
 
     private int deterministicHash(String experimentKey, String userId){
         String hashString = experimentKey + userId;
@@ -15,31 +20,64 @@ public class DeterministicAssignmentService implements AssignmentService{
         return percentHash;
     }
 
+    private Variant determineVariant(ExperimentConfig config, int bucket, int totalWeight){
+        Map<Variant, Integer> weights = config.getWeights();
 
-    public DeterministicAssignmentService(ExperimentStore store){
-        this.store = store;
+        int controlWeight = weights.get(Variant.CONTROL);
+        if (bucket < controlWeight){
+            return Variant.CONTROL;
+        } 
+        
+        int treatmentWeight = weights.get(Variant.TREATMENT);
+        if (bucket < controlWeight + treatmentWeight){
+            return Variant.TREATMENT;
+        } 
+        
+        if(weights.containsKey(Variant.TREATMENT_2)){
+            int optionalWeight = weights.get(Variant.TREATMENT_2);
+            if (bucket < controlWeight + treatmentWeight + optionalWeight){
+                return Variant.TREATMENT_2;
+            }
+            else{
+                throw new IllegalStateException("Bucket value exceeds total weight");
+            }
+        }
+        else{
+            throw new IllegalStateException("Bucket value exceeds total weight");
+        }
+
+            
     }
+        
+    
+
+    public DeterministicAssignmentService(ExperimentStore store, Bucketer bucketer){
+        this.store = store;
+        this.bucketer = bucketer;
+    }
+
+
+
 
     public Variant assign(String experimentKey, String userId){
         if (experimentKey.isBlank()){
-            throw new IllegalArgumentException("Experiment key cannot be null or blank");
+            throw new InvalidInputException("Experiment key cannot be null or blank");
         }
         if (userId.isBlank()){
-            throw new IllegalArgumentException("User id cannot be null or blank");
+            throw new InvalidInputException("User id cannot be null or blank");
         }
         Optional<ExperimentConfig> configOpt = store.get(experimentKey);
         if (configOpt.isEmpty()){
-            throw new IllegalArgumentException("Experiment key "+experimentKey+" does not correspond to a valid experiment");
+            throw new UnknownExperimentException("Experiment key "+experimentKey+" does not correspond to a valid experiment");
         }
         ExperimentConfig config = configOpt.get();
 
-        int treatmentPercent = deterministicHash(experimentKey, userId);
+        String salt = config.getSaltString();
+        int modulo = config.getTotalWeight();
 
-        if (treatmentPercent < config.getTreatmentPercent()){
-            return Variant.TREATMENT;
-        } else{
-            return Variant.CONTROL;
-        }
+        int bucket = bucketer.bucket(experimentKey, userId, salt, modulo);
+
+        return determineVariant(config, bucket, modulo);
 
         
     }
