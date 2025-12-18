@@ -51,7 +51,7 @@ public class DeterministicAssignmentServiceTest {
         assertEquals(imstore.get("abc").get(), config1);
         assertEquals(imstore.get("def").get(), config2);
         assertEquals(imstore.get("a123xy").get(), config3);
-        assertTrue(imstore.get("xyz").isEmpty());
+        assertTrue(imstore.get("xyz")==null);
     }
 
 
