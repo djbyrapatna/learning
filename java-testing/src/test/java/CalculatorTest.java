@@ -14,6 +14,6 @@ public class CalculatorTest{
     @Test
     void divide_byzero_throwsexceptions(){
         Calculator calc = new Calculator();
-        assertThrows(IllegalArgumentException.class, ()->{calc.divide(0,10);});
+        assertThrows(IllegalArgumentException.class, ()->{calc.divide(10,0);});
     }
 }
